@@ -303,10 +303,10 @@ export default function HomePage() {
           <div>
             <h4 className="font-semibold text-gray-900 mb-4">Legal & Support</h4>
             <ul className="space-y-2 text-sm text-gray-600">
-              <li><Link href="#" className="hover:text-green-700 transition">Privacy Policy</Link></li>
-              <li><Link href="#" className="hover:text-green-700 transition">Terms of Service</Link></li>
-              <li><Link href="#" className="hover:text-green-700 transition">Escrow Guidelines</Link></li>
-              <li><Link href="#" className="hover:text-green-700 transition">Help Center</Link></li>
+              <li><Link href="/privacy" className="hover:text-green-700 transition">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-green-700 transition">Terms of Service</Link></li>
+              <li><Link href="/escrow-guidelines" className="hover:text-green-700 transition">Escrow Guidelines</Link></li>
+              <li><Link href="/help" className="hover:text-green-700 transition">Help Center</Link></li>
             </ul>
           </div>
           <div>

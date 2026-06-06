@@ -2,16 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, Star, ChevronDown } from 'lucide-react';
+import { Menu, X, Star } from 'lucide-react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   
-  // Simulated Auth for Admin Access
-  let currentUserEmail = ''; // In a real app, this would come from useSession() or Auth context
-  const ADMIN_EMAIL = 'shuaibthalhat54@gmail.com';
-  const isAdmin = currentUserEmail === ADMIN_EMAIL;
-
   const toggle = () => setIsOpen(!isOpen);
 
   return (
@@ -24,27 +19,19 @@ export default function Navbar() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-700">
-          <button className="flex items-center gap-1 hover:text-black transition-colors">
-            Solutions <ChevronDown className="w-4 h-4" />
-          </button>
-          <Link href="/explore" className="hover:text-black transition-colors">
-            Find Artisans
-          </Link>
-          <button className="flex items-center gap-1 hover:text-black transition-colors">
-            For Artisans <ChevronDown className="w-4 h-4" />
-          </button>
-          <Link href="/dashboard" className="hover:text-black transition-colors">
-            Wallet
-          </Link>
-          <Link href="/report" className="hover:text-black transition-colors">
-            Request an Artisan
-          </Link>
+          <Link href="/report" className="hover:text-black transition-colors">Request an Artisan</Link>
+          <Link href="/dashboard" className="hover:text-black transition-colors">User Dashboard</Link>
+          <Link href="/artisan/register" className="hover:text-black transition-colors">Become an Artisan</Link>
+          <Link href="/artisan/dashboard" className="hover:text-black transition-colors">Artisan Hub</Link>
+          <Link href="/admin" className="hover:text-black transition-colors">Admin</Link>
+          <Link href="/ussd" className="hover:text-black transition-colors">USSD Demo</Link>
+          <Link href="/whatsapp" className="hover:text-black transition-colors">WhatsApp Demo</Link>
         </nav>
 
         {/* Right Nav */}
         <div className="hidden md:flex items-center gap-6">
           <Link href="/artisan/dashboard" className="text-sm font-medium text-gray-700 hover:text-black transition-colors">
-            Login
+            Artisan Hub
           </Link>
           <Link href="/report" className="bg-green-700 text-white px-5 py-2.5 rounded-none text-sm font-medium hover:bg-green-800 transition-colors">
             Get started free
@@ -61,14 +48,13 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden fixed inset-0 z-40 bg-white pt-20 flex flex-col h-screen overflow-y-auto w-full">
           <nav className="flex flex-col text-lg font-medium text-gray-800">
-            <Link href="/" onClick={toggle} className="py-4 px-6 border-b border-gray-100 block transition-colors hover:bg-gray-50 hover:text-green-600">Home</Link>
-            <Link href="/explore" onClick={toggle} className="py-4 px-6 border-b border-gray-100 block transition-colors hover:bg-gray-50 hover:text-green-600">Find Artisans</Link>
+          <Link href="/" onClick={toggle} className="py-4 px-6 border-b border-gray-100 block transition-colors hover:bg-gray-50 hover:text-green-600">Home</Link>
             <Link href="/report" onClick={toggle} className="py-4 px-6 border-b border-gray-100 block transition-colors hover:bg-gray-50 hover:text-green-600">Request an Artisan</Link>
             <Link href="/dashboard" onClick={toggle} className="py-4 px-6 border-b border-gray-100 block transition-colors hover:bg-gray-50 hover:text-green-600">User Wallet</Link>
             <Link href="/artisan/dashboard" onClick={toggle} className="py-4 px-6 border-b border-gray-100 block transition-colors hover:bg-gray-50 hover:text-green-600">Artisan Hub</Link>
-            {isAdmin && (
-              <Link href="/admin" onClick={toggle} className="py-4 px-6 border-b border-gray-100 block transition-colors hover:bg-gray-50 hover:text-green-600">Admin Console</Link>
-            )}
+            <Link href="/admin" onClick={toggle} className="py-4 px-6 border-b border-gray-100 block transition-colors hover:bg-gray-50 hover:text-green-600">Admin Console</Link>
+            <Link href="/ussd" onClick={toggle} className="py-4 px-6 border-b border-gray-100 block transition-colors hover:bg-gray-50 hover:text-green-600">USSD Demo</Link>
+            <Link href="/whatsapp" onClick={toggle} className="py-4 px-6 border-b border-gray-100 block transition-colors hover:bg-gray-50 hover:text-green-600">WhatsApp Demo</Link>
             <Link href="/artisan/register" onClick={toggle} className="py-4 px-6 border-b border-gray-100 block text-green-700 hover:bg-green-50 transition-colors">Register as Artisan</Link>
           </nav>
         </div>

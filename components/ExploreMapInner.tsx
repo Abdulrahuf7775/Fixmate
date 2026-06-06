@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import Link from 'next/link';
 import { Star, ShieldCheck } from 'lucide-react';
-import { useEffect } from 'react';
+import { ArtisanData } from '@/lib/types';
 
 // Fix Leaflet icon loading issues in Next.js
 const customIcon = new L.Icon({
@@ -18,9 +18,7 @@ const customIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-type Artisan = any;
-
-function ArtisanMarker({ artisan }: { artisan: Artisan }) {
+function ArtisanMarker({ artisan }: { artisan: ArtisanData }) {
   if (!artisan.lat || !artisan.lng) return null;
   
   return (
@@ -44,7 +42,7 @@ function ArtisanMarker({ artisan }: { artisan: Artisan }) {
   );
 }
 
-export default function ExploreMapInner({ artisans }: { artisans: Artisan[] }) {
+export default function ExploreMapInner({ artisans }: { artisans: ArtisanData[] }) {
   return (
     <MapContainer 
       center={[6.5244, 3.3792]} // Lagos center

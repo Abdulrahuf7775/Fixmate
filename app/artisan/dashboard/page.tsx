@@ -1,184 +1,139 @@
-import Link from 'next/link';
-import JobChat from '@/components/JobChat';
+"use client";
+
+import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
+import JobChat from "@/components/JobChat";
+import { escrowAction, loadDb, saveInventoryItem } from "@/lib/demo-db";
+import { FixMateDB } from "@/lib/types";
+
+const naira = (value: number) => `N${value.toLocaleString()}`;
 
 export default function ArtisanDashboardPage() {
+  const [db, setDb] = useState<FixMateDB | null>(null);
+  const refresh = () => setDb(loadDb());
+
+  useEffect(() => {
+    refresh();
+    window.addEventListener("fixmate-db-updated", refresh);
+    return () => window.removeEventListener("fixmate-db-updated", refresh);
+  }, []);
+
+  if (!db) return null;
+  const artisan = db.artisans.find((item) => item.applicationStatus === "approved") ?? db.artisans[0];
+  const jobs = db.job_requests.filter((job) => job.selectedArtisanId === artisan.id);
+  const inventory = db.inventory_items.filter((item) => item.artisanId === artisan.id);
+
+  const run = (bookingId: string, action: "artisan_accept" | "artisan_decline" | "mark_completed") => {
+    setDb(escrowAction(bookingId, action));
+  };
+
+  const addInventory = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setDb(saveInventoryItem({
+      artisanId: artisan.id,
+      name: String(form.get("name") || ""),
+      quantity: Number(form.get("quantity") || 0),
+      unit: String(form.get("unit") || "pcs"),
+      lowStockAt: Number(form.get("lowStockAt") || 1),
+    }));
+    event.currentTarget.reset();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans pb-10">
-      <header className="bg-white px-6 py-4 flex items-center justify-between border-b shadow-sm mb-4">
+      <header className="bg-white px-4 sm:px-6 py-4 flex items-center justify-between border-b shadow-sm mb-4">
         <span className="text-xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
-          <div className="w-8 h-8 bg-gray-900 rounded flex items-center justify-center font-bold text-white text-xl">
-            🛠️
-          </div>
+          <span className="w-8 h-8 bg-gray-900 rounded-none flex items-center justify-center font-bold text-white text-xl">F</span>
           FixMate Artisan
         </span>
         <div className="flex gap-4 items-center">
-           <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded">Verified</span>
-           <Link href="/" className="text-sm font-medium text-gray-600 hover:text-gray-900">
-             Logout
-           </Link>
+          <span className={`text-xs font-bold px-2 py-1 rounded-none ${artisan.isVerified ? "text-green-700 bg-green-100" : "text-orange-700 bg-orange-100"}`}>{artisan.applicationStatus}</span>
+          <Link href="/" className="text-sm font-medium text-gray-600 hover:text-gray-900">Logout</Link>
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center py-8 px-6 max-w-5xl mx-auto w-full gap-6">
-        
-        {/* Top Metrics Row */}
-        <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6">
-           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-             <p className="text-sm text-gray-500 font-medium mb-1">Available OPay Balance</p>
-             <h2 className="text-3xl font-bold text-gray-900">₦142,500</h2>
-             <p className="text-xs text-green-600 mt-2 font-medium">+₦13,500 safely released today</p>
-           </div>
-           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-             <p className="text-sm text-gray-500 font-medium mb-1">Pending in Escrow</p>
-             <h2 className="text-3xl font-bold text-gray-900">₦25,000</h2>
-             <p className="text-xs text-gray-500 mt-2 font-medium">From 2 active jobs</p>
-           </div>
-           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-             <p className="text-sm text-gray-500 font-medium mb-1">Trust Score</p>
-             <div className="flex items-end gap-2">
-               <h2 className="text-3xl font-bold text-green-600">92%</h2>
-               <span className="text-sm text-gray-500 pb-1">Excellent</span>
-             </div>
-             <p className="text-xs text-green-600 mt-2 font-medium">High visibility ranking</p>
-           </div>
+      <main className="flex-1 flex flex-col items-center py-6 sm:py-8 px-4 sm:px-6 max-w-6xl mx-auto w-full gap-6">
+        <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Metric label="Available OPay Balance" value={naira(artisan.artisan_available_balance)} hint="Released after escrow completion" />
+          <Metric label="Pending in Escrow" value={naira(artisan.artisan_pending_balance)} hint={`${jobs.length} assigned jobs`} />
+          <Metric label="Trust Score" value={`${artisan.trustScore}%`} hint={`${artisan.completedJobs} completed jobs`} green />
         </div>
 
-        {/* Main Content Grid */}
         <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          {/* Active Jobs */}
-          <div className="lg:col-span-2 space-y-6">
-             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-               <div className="flex justify-between items-center mb-4">
-                 <h3 className="font-bold text-lg text-gray-900">Active Job Requests</h3>
-                 <span className="text-sm text-green-600 font-bold bg-green-50 px-2 py-1 rounded">1 In Progress, 1 New</span>
-               </div>
-               
-               <div className="space-y-6">
-                 {/* Job 1 In Progress */}
-                 <div className="border border-green-200 rounded-xl p-4 bg-green-50/30">
-                    <div className="flex justify-between items-start mb-2">
-                       <div>
-                         <h4 className="font-bold text-gray-900">AC Dripping Water + Warm Air</h4>
-                         <p className="text-xs text-gray-600 mt-1">Customer: Chukwudi Eze • 📍 Surulere</p>
-                       </div>
-                       <div className="text-right">
-                         <span className="font-bold text-gray-900">₦15,000</span>
-                         <p className="text-xs text-green-600 font-semibold bg-green-100 px-2 py-0.5 rounded mt-1">Escrow Hosted</p>
-                       </div>
-                    </div>
-                    <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg mt-3 mb-4">
-                       <p className="text-xs font-semibold text-blue-900 mb-1">🤖 Gemini Assessor Note:</p>
-                       <p className="text-xs text-blue-800">Customer uploaded a photo showing blocked drainage and frozen coils. High probability of low refrigerant.</p>
-                    </div>
-                    <JobChat jobId="job-123" currentUserType="artisan" />
-                    <div className="mt-4">
-                       <button className="w-full py-3 bg-green-600 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-green-700 transition">Mark as Completed</button>
-                    </div>
-                 </div>
-
-                 {/* Job 2 New */}
-                 <div className="border border-gray-100 rounded-xl p-4 bg-gray-50">
-                    <div className="flex justify-between items-start mb-2">
-                       <div>
-                         <h4 className="font-bold text-gray-900">Generator Won&apos;t Start</h4>
-                         <p className="text-xs text-gray-500 mt-1">📍 Yaba • 3km away</p>
-                       </div>
-                       <div className="text-right">
-                         <span className="font-bold text-gray-900">₦10,000</span>
-                         <p className="text-xs text-gray-500 font-semibold bg-gray-200 px-2 py-0.5 rounded mt-1">Awaiting Accept</p>
-                       </div>
-                    </div>
-                    <div className="mt-4 flex gap-2">
-                       <button className="flex-1 py-2 bg-gray-900 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-gray-800">Accept & Navigate</button>
-                       <button className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-bold">Decline</button>
-                    </div>
-                 </div>
-               </div>
-             </div>
-
-             {/* SME Sales Log */}
-             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-               <h3 className="font-bold text-lg text-gray-900 mb-4">Recent Completed Jobs</h3>
-               <div className="overflow-x-auto">
-                 <table className="w-full text-left border-collapse">
-                   <thead>
-                     <tr className="border-b border-gray-200 text-sm text-gray-500">
-                       <th className="pb-2 font-medium">Customer</th>
-                       <th className="pb-2 font-medium">Service</th>
-                       <th className="pb-2 font-medium">Date</th>
-                       <th className="pb-2 font-medium text-right">Net Payout</th>
-                     </tr>
-                   </thead>
-                   <tbody className="text-sm">
-                     <tr className="border-b border-gray-100 last:border-0">
-                       <td className="py-3 font-medium text-gray-900">Chukwudi Eze</td>
-                       <td className="py-3 text-gray-600">Generator Servicing</td>
-                       <td className="py-3 text-gray-500">Today</td>
-                       <td className="py-3 text-right font-bold text-green-600">₦18,000</td>
-                     </tr>
-                     <tr className="border-b border-gray-100 last:border-0">
-                       <td className="py-3 font-medium text-gray-900">Amaka Obi</td>
-                       <td className="py-3 text-gray-600">Pipe Fitting</td>
-                       <td className="py-3 text-gray-500">Yesterday</td>
-                       <td className="py-3 text-right font-bold text-green-600">₦8,500</td>
-                     </tr>
-                   </tbody>
-                 </table>
-               </div>
-             </div>
-          </div>
-
-          {/* Right Sidebar - Inventory Tools */}
-          <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-               <h3 className="font-bold text-lg text-gray-900 mb-4 flex items-center gap-2">
-                 📦 Inventory Tracker
-               </h3>
-               <p className="text-xs text-gray-500 mb-4">Track materials needed for your jobs so you never run out unexpectedly.</p>
-               
-               <div className="space-y-3">
-                 <div className="flex justify-between items-center p-3 border border-gray-100 rounded-lg">
-                   <div>
-                     <p className="font-semibold text-gray-900 text-sm">R22 AC Gas</p>
-                     <p className="text-xs text-red-500 font-medium">Low Stock</p>
-                   </div>
-                   <span className="font-bold text-gray-900">1 Cylinder</span>
-                 </div>
-                 <div className="flex justify-between items-center p-3 border border-gray-100 rounded-lg">
-                   <div>
-                     <p className="font-semibold text-gray-900 text-sm">Copper Pipes (1/4&quot;)</p>
-                     <p className="text-xs text-green-600 font-medium">Healthy</p>
-                   </div>
-                   <span className="font-bold text-gray-900">12 Meters</span>
-                 </div>
-                 <div className="flex justify-between items-center p-3 border border-gray-100 rounded-lg">
-                   <div>
-                     <p className="font-semibold text-gray-900 text-sm">Sealant Tape</p>
-                     <p className="text-xs text-green-600 font-medium">Healthy</p>
-                   </div>
-                   <span className="font-bold text-gray-900">15 Rolls</span>
-                 </div>
-               </div>
-               
-               <button className="w-full mt-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-bold rounded-lg transition-colors">
-                 + Log New Material
-               </button>
+          <section className="lg:col-span-2 bg-white p-5 sm:p-6 rounded-none shadow-sm border border-gray-200">
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="font-bold text-lg text-gray-900">Assigned Jobs</h1>
+              <span className="text-sm text-green-700 font-bold bg-green-50 px-2 py-1 rounded-none">{artisan.fullName}</span>
             </div>
-
-            {/* OPay Loan Teaser */}
-            <div className="bg-gradient-to-br from-green-500 to-green-700 p-6 rounded-2xl shadow-md text-white">
-               <h3 className="font-bold text-lg mb-2">Grow your business</h3>
-               <p className="text-sm opacity-90 mb-4">Based on your Trust Score and Escrow history, you are pre-approved for an OPay working capital loan up to ₦100,000.</p>
-               <button className="w-full py-3 bg-white text-green-700 text-sm font-bold rounded-lg shadow hover:bg-green-50 transition-colors">
-                 Apply Now
-               </button>
+            <div className="space-y-5">
+              {jobs.length === 0 && <div className="text-center p-8 bg-gray-100 rounded-none text-gray-500 text-sm border border-gray-200">No assigned jobs yet. Select this artisan from a report to create one.</div>}
+              {jobs.map((job) => {
+                const diagnosis = db.diagnoses.find((item) => item.id === job.diagnosisId);
+                const booking = job.bookingId ? db.bookings.find((item) => item.id === job.bookingId) : undefined;
+                const user = db.users.find((item) => item.id === job.userId);
+                return (
+                  <div key={job.id} className="border border-gray-100 rounded-none p-4 bg-gray-50">
+                    <div className="flex justify-between items-start gap-4 mb-2">
+                      <div>
+                        <h2 className="font-bold text-gray-900">{diagnosis?.issue_title ?? job.description}</h2>
+                        <p className="text-xs text-gray-600 mt-1">Customer: {user?.name} | {job.location}</p>
+                        <p className="text-xs text-blue-800 mt-2 bg-blue-50 border border-blue-100 p-2">{diagnosis?.summary}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-bold text-gray-900">{booking ? naira(booking.quoteAmount) : "No quote"}</span>
+                        <p className="text-xs text-green-700 font-semibold bg-green-100 px-2 py-0.5 rounded-none mt-1">{job.status.replaceAll("_", " ")}</p>
+                      </div>
+                    </div>
+                    {booking && (
+                      <div className="mt-4 flex flex-col sm:flex-row gap-2">
+                        <button onClick={() => run(booking.id, "artisan_accept")} className="flex-1 py-2 bg-gray-900 text-white rounded-none text-sm font-bold">Accept Job</button>
+                        <button onClick={() => run(booking.id, "mark_completed")} className="flex-1 py-2 bg-green-700 text-white rounded-none text-sm font-bold">Mark Completed</button>
+                        <button onClick={() => run(booking.id, "artisan_decline")} className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-none text-sm font-bold">Decline</button>
+                      </div>
+                    )}
+                    <JobChat jobId={job.id} currentUserType="artisan" />
+                  </div>
+                );
+              })}
             </div>
-          </div>
-          
+          </section>
+
+          <aside className="space-y-6">
+            <div className="bg-white p-6 rounded-none shadow-sm border border-gray-200">
+              <h2 className="font-bold text-lg text-gray-900 mb-4">Inventory Tracker</h2>
+              <div className="space-y-3">
+                {inventory.map((item) => (
+                  <div key={item.id} className="flex justify-between items-center p-3 border border-gray-100 rounded-none">
+                    <div>
+                      <p className="font-semibold text-gray-900 text-sm">{item.name}</p>
+                      <p className={`text-xs font-medium ${item.quantity <= item.lowStockAt ? "text-red-500" : "text-green-600"}`}>{item.quantity <= item.lowStockAt ? "Low stock" : "Healthy"}</p>
+                    </div>
+                    <span className="font-bold text-gray-900">{item.quantity} {item.unit}</span>
+                  </div>
+                ))}
+              </div>
+              <form onSubmit={addInventory} className="grid grid-cols-2 gap-2 mt-4">
+                <input name="name" placeholder="Material" className="col-span-2 border border-gray-300 rounded-none p-2 text-sm" required />
+                <input name="quantity" placeholder="Qty" type="number" className="border border-gray-300 rounded-none p-2 text-sm" required />
+                <input name="unit" placeholder="Unit" className="border border-gray-300 rounded-none p-2 text-sm" required />
+                <input name="lowStockAt" placeholder="Low at" type="number" className="border border-gray-300 rounded-none p-2 text-sm" required />
+                <button className="bg-gray-900 text-white rounded-none text-sm font-bold">Add</button>
+              </form>
+            </div>
+          </aside>
         </div>
-
       </main>
+    </div>
+  );
+}
+
+function Metric({ label, value, hint, green = false }: { label: string; value: string; hint: string; green?: boolean }) {
+  return (
+    <div className="bg-white p-6 rounded-none shadow-sm border border-gray-200">
+      <p className="text-sm text-gray-500 font-medium mb-1">{label}</p>
+      <h2 className={`text-3xl font-bold ${green ? "text-green-700" : "text-gray-900"}`}>{value}</h2>
+      <p className="text-xs text-gray-500 mt-2 font-medium">{hint}</p>
     </div>
   );
 }
