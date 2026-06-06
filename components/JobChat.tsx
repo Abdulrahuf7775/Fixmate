@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Send, User as UserIcon } from "lucide-react";
 import { loadDb, saveMessage } from "@/lib/demo-db";
 import { Message } from "@/lib/types";
 
@@ -60,7 +59,7 @@ export default function JobChat({ jobId, currentUserType }: JobChatProps) {
             return (
               <div key={msg.id} className={`flex gap-3 ${isMe ? "flex-row-reverse" : ""}`}>
                 <div className={`w-8 h-8 rounded-none flex items-center justify-center flex-shrink-0 ${isMe ? "bg-green-700" : "bg-gray-900"}`}>
-                  {isMe ? <UserIcon className="w-4 h-4 text-white" /> : <span className="text-xs text-white uppercase font-bold">{msg.senderType.charAt(0)}</span>}
+                  <span className="text-xs text-white uppercase font-bold">{isMe ? "ME" : msg.senderType.charAt(0)}</span>
                 </div>
                 <div className={`max-w-[75%] rounded-none p-3 text-sm ${isMe ? "bg-green-700 text-white" : "bg-white border border-gray-200 text-gray-800"}`}>
                   <p>{msg.text}</p>
@@ -90,7 +89,7 @@ export default function JobChat({ jobId, currentUserType }: JobChatProps) {
           className="flex-1 border border-gray-300 rounded-none px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 text-gray-900"
         />
         <button onClick={handleSend} disabled={!inputText.trim()} className="bg-gray-900 hover:bg-gray-800 text-white p-2 rounded-none disabled:opacity-50">
-          <Send className="w-5 h-5" />
+          Send
         </button>
       </div>
     </div>

@@ -10,7 +10,8 @@ FixMate is a hackathon MVP for an OPay + Google Gemini scholarship project. It i
 - Simulated OPay escrow ledger with references like `OPAY-FIX-2026-0001`.
 - User fee: 2% when escrow is funded.
 - Artisan fee: 10% deducted from completed payout.
-- User dashboard, artisan dashboard, admin panel, persisted chat, USSD simulator, and WhatsApp-style assistant demo.
+- User dashboard, artisan dashboard, admin panel, and persisted job chat.
+- WhatsApp bot support is planned to mirror website job request, status, and payment activities. Registration remains website-only.
 
 ## Gemini Usage
 
@@ -78,8 +79,7 @@ npm run dev
 5. Open `/artisan/dashboard`, accept the job, send a chat message, and mark it completed.
 6. Open `/dashboard`, release funds, and leave a review.
 7. Open `/admin` to inspect ledger records, approve artisans, resolve disputes, and adjust trust scores.
-8. Try `/ussd` for `*955*349#` style actions.
-9. Try `/whatsapp` for a chat-style Gemini diagnosis.
+8. Note the product direction: WhatsApp bot support will mirror website activities later, but artisan and user registration stay on the website.
 
 ## Future Real OPay Integration Plan
 

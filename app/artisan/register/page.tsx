@@ -3,7 +3,6 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Briefcase, ChevronLeft, ShieldCheck } from "lucide-react";
 import LocationAutocomplete from "@/components/LocationAutocomplete";
 import { saveArtisanApplication } from "@/lib/demo-db";
 import { ARTISAN_CATEGORIES, ArtisanCategory } from "@/lib/types";
@@ -33,15 +32,14 @@ export default function ArtisanRegisterPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <header className="bg-white px-4 sm:px-6 py-4 flex items-center border-b shadow-sm mb-4">
-        <Link href="/" className="text-gray-500 hover:text-gray-800 mr-4 font-bold flex items-center gap-1"><ChevronLeft className="w-5 h-5" /> Back</Link>
+        <Link href="/" className="text-gray-500 hover:text-gray-800 mr-4 font-bold flex items-center gap-1">Back</Link>
         <span className="text-xl font-bold text-gray-900 tracking-tight">Artisan Onboarding</span>
       </header>
 
       <main className="flex-1 flex flex-col items-center py-6 sm:py-10 px-4 sm:px-6 max-w-lg mx-auto w-full animate-fade-in-up">
         <div className="bg-white p-6 sm:p-8 rounded-none shadow-sm border border-gray-200 w-full">
           <div className="relative w-full h-20 flex items-center justify-center mb-4">
-            <Briefcase className="w-12 h-12 text-gray-800" strokeWidth={1.5} />
-            <ShieldCheck className="w-6 h-6 text-green-700 absolute bottom-1 ml-10 bg-white rounded-none p-0.5 border border-gray-100" strokeWidth={1.5} />
+            <div className="border border-green-200 bg-green-50 px-4 py-2 text-sm font-bold text-green-800">Verified artisan application</div>
           </div>
           <h1 className="text-2xl font-extrabold text-gray-900 mb-2 text-center">Join FixMate</h1>
           <p className="text-gray-600 mb-6 text-center text-sm">Applications are saved for admin approval. Completed jobs carry a 10% artisan escrow fee.</p>

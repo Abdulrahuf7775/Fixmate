@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { CheckCircle, ChevronLeft, Shield, Wallet } from "lucide-react";
 import { escrowAction, loadDb } from "@/lib/demo-db";
 import { Artisan, Booking, DiagnosisRecord, FixMateDB, JobRequest } from "@/lib/types";
 
@@ -63,7 +62,7 @@ export default function BookingPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans mb-20 animate-fade-in-up">
       <header className="bg-white px-4 sm:px-6 py-4 flex items-center border-b shadow-sm mb-4">
         <Link href="/report" className="text-gray-500 hover:text-gray-800 mr-4 font-bold flex items-center gap-1">
-          <ChevronLeft className="w-5 h-5" /> Back
+          Back
         </Link>
         <span className="text-xl font-bold text-gray-900 tracking-tight">Simulated OPay Escrow</span>
       </header>
@@ -95,11 +94,9 @@ export default function BookingPage() {
           {booking.escrowStatus === "not_funded" && (
             <>
               <div className="relative w-full h-24 flex items-center justify-center mb-6">
-                <Wallet className="w-10 h-10 text-gray-800" strokeWidth={1.5} />
-                <Shield className="w-6 h-6 text-green-700 absolute bottom-2 ml-10 bg-white rounded-none p-0.5 border border-gray-100" strokeWidth={1.5} />
+                <div className="border border-green-200 bg-green-50 px-4 py-2 text-sm font-bold text-green-800">Escrow funding</div>
               </div>
               <div className="flex items-center gap-3 mb-6 bg-green-50 p-3 rounded-none border border-green-100">
-                <Shield className="w-6 h-6 text-green-700" />
                 <div>
                   <p className="text-sm font-semibold text-green-900">Simulated OPay escrow ledger</p>
                   <p className="text-xs text-green-700 mt-0.5">No real OPay API is connected. This demo records ledger movements transparently.</p>
@@ -116,12 +113,11 @@ export default function BookingPage() {
           {booking.escrowStatus !== "not_funded" && (
             <div className="text-center py-4">
               <div className="w-20 h-20 bg-gray-50 text-green-700 rounded-none flex items-center justify-center mx-auto mb-4 border-2 border-green-600">
-                <Shield className="w-10 h-10" />
+                <span className="text-sm font-black">LOCKED</span>
               </div>
               <h2 className="text-xl font-bold text-gray-900 mb-2">Escrow status: {booking.escrowStatus}</h2>
               <p className="text-gray-600 text-sm mb-6">{naira(booking.quoteAmount)} is tracked in the simulated escrow ledger.</p>
               <div className="border border-gray-200 rounded-none p-4 bg-gray-50 mb-6 text-left flex items-start gap-3">
-                <CheckCircle className="w-6 h-6 text-green-700 mt-1 shrink-0" />
                 <div>
                   <p className="font-semibold text-gray-900 text-sm">Release only after completion</p>
                   <p className="text-xs text-gray-500">The artisan receives {naira(booking.quoteAmount - booking.artisanFee)} after the 10% artisan fee.</p>
